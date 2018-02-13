@@ -43,60 +43,61 @@ function formatDate(date,fmt) { //author: meizz
       fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
   return fmt;
 }
+exports.handler = function(event, context, callback){
+  console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "开始记录银监会的相关新闻");
+  fetch("http://www.cbrc.gov.cn/index.html")
+  .then(function(response){
+    console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "开始抓取数据");
+    return response.text();
+  }).then(function(text){
+    console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "抓取数据成功");
+    var $ = cheerio.load(text);
 
-console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "开始记录银监会的相关新闻");
-fetch("http://www.cbrc.gov.cn/index.html")
-.then(function(response){
-  console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "开始抓取数据");
-  return response.text();
-}).then(function(text){
-  console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "抓取数据成功");
-  var $ = cheerio.load(text);
-
-  $(config).each(function(_i,_e){
-    var $temp = $(_e.selector);
-    if(_e.index){
-      $temp = $temp.get(_e.index);
-    }
-    $("a", $temp).each(function(i, e){
-      var $a = $(e);
-      var link = "http://www.cbrc.gov.cn"+$a.attr("href");
-      var title = $a.attr("title");
-      var categoryName = _e.categoryName;
-      if(title) {
-        var queryParams = {
-          TableName:tableName,
-          Key:{
-              "title": title,
-              "link": link
-          }
-        }
-        docClient.get(queryParams, function(err, data){
-          if(err){
-          } else if(!data.Item) {
-            var params = {
-                TableName:tableName,
-                Item:{
-                    "title": title,
-                    "category": categoryName,
-                    "department": "银监会",
-                    "link":link,
-                    "date": formatDate(new Date())
-                }
-            };
-            docClient.put(params,function(err,data){
-              if (err) {
-                console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
-              } else {
-                console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "保存数据成功:"+JSON.stringify(params.Item));
-              }
-            })
-          } else {
-            console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "记录已存在:"+JSON.stringify(queryParams.Key));
-          }
-        })
+    $(config).each(function(_i,_e){
+      var $temp = $(_e.selector);
+      if(_e.index){
+        $temp = $temp.get(_e.index);
       }
+      $("a", $temp).each(function(i, e){
+        var $a = $(e);
+        var link = "http://www.cbrc.gov.cn"+$a.attr("href");
+        var title = $a.attr("title");
+        var categoryName = _e.categoryName;
+        if(title) {
+          var queryParams = {
+            TableName:tableName,
+            Key:{
+                "title": title,
+                "link": link
+            }
+          }
+          docClient.get(queryParams, function(err, data){
+            if(err){
+            } else if(!data.Item) {
+              var params = {
+                  TableName:tableName,
+                  Item:{
+                      "title": title,
+                      "category": categoryName,
+                      "department": "银监会",
+                      "link":link,
+                      "date": formatDate(new Date())
+                  }
+              };
+              docClient.put(params,function(err,data){
+                if (err) {
+                  console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+                } else {
+                  console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "保存数据成功:"+JSON.stringify(params.Item));
+                }
+              })
+            } else {
+              console.log(formatDate(new Date(),'yyyy-MM-dd hh:mm:ss') + "记录已存在:"+JSON.stringify(queryParams.Key));
+            }
+          })
+        }
+      })
     })
   })
-})
+}
 
