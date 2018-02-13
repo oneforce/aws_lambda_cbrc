@@ -1,0 +1,14 @@
+{
+  "name": "aws_lambda_cbrc",
+  "version": "1.0.0",
+  "description": "使用aws lamdba 抓取银监会的最新信息",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.192.0"
+  }
+}
