@@ -2,15 +2,19 @@ language: node_js  #设置语言
 
 node_js: 6.10.3  #设置相应的版本
 
+
 before_script:
   - npm install
+  - rm -rf node_modules/aws-sdk/
 
 deploy:
-  provider: lambda
+  provider: lambda #https://github.com/travis-ci/dpl#lambda
   function_name: "lambda_cbrc"
   region: "us-east-1"
   role: "arn:aws:iam::049905744413:role/lambda_basic_execution"
   runtime: "nodejs6.10"
   handler_name: "handler"
+  timeout: 10
+  publish: true
   access_key_id: "${AWS_ACCESS_KEY_ID}"
   secret_access_key: "${AWS_SECRET_ACCESS_KEY}"
