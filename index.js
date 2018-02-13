@@ -73,6 +73,7 @@ exports.handler = function(event, context, callback){
           }
           docClient.get(queryParams, function(err, data){
             if(err){
+              console.error("Unable to query item. Error JSON:", JSON.stringify(err, null, 2));
             } else if(!data.Item) {
               var params = {
                   TableName:tableName,
